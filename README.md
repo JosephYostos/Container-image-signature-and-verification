@@ -1,4 +1,4 @@
-# Container image signature and verification
+# Container images signature and verification
 
 This repo aims to set up a solution to sign container images and integrate it with Kubernetes clusters to improve the software supply chain security. 
 
