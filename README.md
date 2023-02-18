@@ -13,3 +13,6 @@ This repo aims to set up a solution to sign container images and integrate it wi
 
 - [Module 0: Solution overview ](modules/solution-overview.md)
 - [Module 1: Sign and publish a container image to an OCI registryusing Cosign ](modules/Sign-images.md)
+- [Module 2: Signature verification via Kubernetes Admission controllers and Connaisseur](modules/Connaisseur.md)
+
+
