@@ -9,3 +9,6 @@ This repo aims to set up a solution to sign container images and integrate it wi
 4- Notify of blocked or noncompliant images in Sysdig events UI
 
 
+## Modules
+
+- [Module 1: Sign and publish a container image to an OCI registry ](modules/Sign-images.md)
