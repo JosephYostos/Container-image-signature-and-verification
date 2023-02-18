@@ -56,7 +56,7 @@ now if you check the image in the registry it should has a sha256 digest
 
 >> add screenshot
 
-## 5. VVerify a container image against a public key
+## 5. Verify a container image against a public key
 
 ```
 cosign verify --key cosign.pub josephyostos/dev-repo:signed | jq .
