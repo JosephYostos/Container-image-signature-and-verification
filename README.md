@@ -11,4 +11,5 @@ This repo aims to set up a solution to sign container images and integrate it wi
 
 ## Modules
 
+- [Module 0: Solution overview ](modules/solution-overview.md)
 - [Module 1: Sign and publish a container image to an OCI registry ](modules/Sign-images.md)
