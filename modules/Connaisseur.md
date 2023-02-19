@@ -28,6 +28,12 @@ The result should look similar to this:
 
 >> screenshot
 
+update the setup:
+
+```
+helm upgrade connaisseur helm --atomic --create-namespace --namespace connaisseur
+```
+
 ## Test Connaisseur
 
 First test 
