@@ -35,7 +35,7 @@ For the demo purpose I will pull an nginx image from then tag it and push it to 
 ```
 docker pull nginx
 docker tag nginx:latest josephyostos/dev-repo:signed 
-docker login 
+docker push josephyostos/dev-repo:signed 
 ```
 
 Let's sign the image. 
