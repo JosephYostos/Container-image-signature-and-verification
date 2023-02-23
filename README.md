@@ -10,15 +10,22 @@ This repo aims to set up a solution to sign container images and integrate it wi
 
 ## Steps:
 
-create 
+1-  Create Kuberenetes cluster  
 
-To be able to demonstrate the PoC workflow, a k8s cluster is required. In this case, we leverage kind to have a quick k8s environment in a Fedora 35 x86_64laptop using a podman rootless backend. Also, the following snippet shows how to install some required tools, including cosign, helm, etc.:
-
-I have created a 1 node kubeadm cluster on ubuntu ec2 instance. use the following script to install kubeadm (k8 2.25) with calico CNI (3.24):
+To start our POC we need a kuberenetes clysetr to work with. I have created a 1 node kubeadm cluster on ubuntu 18.04 ec2 (t2.xlarge) instance. use the following script to install kubeadm (k8 2.25) with calico CNI (3.24):
 
 ```bash
 ./manifest/one-node-kubeadm.sh
 ```
+
+2- Install cosign 
+This script will install go 1.19, then install cosign and generate a key with password `C0S!gN`. To change the password edit the COSIGN_PASSWORD in the shell script.
+
+```bash
+source ./manifest/cosign.sh
+```
+
+
 
 ## Modules
 
