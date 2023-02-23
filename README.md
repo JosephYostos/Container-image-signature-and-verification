@@ -33,13 +33,13 @@ docker login
 ```
 
 4- upload image to your registry.
-For the demo purpose, I will download two different versions of nginx images and will tag it, then push it to my registry. feel free to create or choose any other image.    
+For the demo purpose, I will download two different images and will tag it, then push it to my registry. feel free to create or choose any other image.    
 
 ```bash 
-docker pull nginx:1.23
-docker pull nginx:1.22
-docker tag nginx:1.23 josephyostos/dev-repo:signed 
-docker tag anginx:1.22 josephyostos/dev-repo:unsigned
+docker pull alpine
+docker pull hello-world
+docker tag alpine josephyostos/dev-repo:signed 
+docker tag hello-world josephyostos/dev-repo:unsigned
 docker push josephyostos/dev-repo:signed
 docker push josephyostos/dev-repo:unsigned
 ```
