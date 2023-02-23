@@ -25,6 +25,41 @@ This script will install go 1.19, then install cosign and generate a key with pa
 source ./manifest/cosign.sh
 ```
 
+3- Login to your container registry using your own cerdientials. 
+I this example I used docker hub so I will use `docker login` command  
+
+```bash
+docker login
+```
+
+4- upload image to your registry.
+For the demo purpose, I will download two different versions of nginx images and will tag it, then push it to my registry. feel free to create or choose any other image.    
+
+```bash 
+docker pull nginx:1.23
+docker pull nginx:1.22
+docker tag nginx:1.23 josephyostos/dev-repo:signed 
+docker tag anginx:1.22 josephyostos/dev-repo:unsigned
+docker push josephyostos/dev-repo:signed
+docker push josephyostos/dev-repo:unsigned
+```
+
+5- sign the image 
+
+```bash
+cosign sign --key cosign.key josephyostos/dev-repo:signed
+```
+we will get message `Pushing signature to: index.docker.io/josephyostos/dev-repo`
+
+6- Kyverno 
+
+# Add the Helm repository
+helm repo add kyverno https://kyverno.github.io/kyverno/
+# Scan your Helm repositories to fetch the latest available charts.
+helm repo update
+# Install the Kyverno Helm chart into a new namespace called "kyverno"
+helm install kyverno kyverno/kyverno -n kyverno --create-namespace
+
 
 
 ## Modules
