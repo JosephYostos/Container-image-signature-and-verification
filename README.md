@@ -1,12 +1,32 @@
 # Container images signature and verification
 
-This repo aims to set up a solution to sign container images and integrate it with Kubernetes clusters to improve the software supply chain security. 
+## Goal 
+This repo aims to set up a POC to sign container images and incorporate the verification into Kubernetes clusters to improve the software supply chain security.
 
 ## Learning Objectives.
-1- Sign and publish a container image to an OCI registry
-2- Demonstrate how the signature verification is performed in the cluster
-3- Block unsigned images in a specific namespace, allow but warn on other namespaces
-4- Notify of blocked or noncompliant images in Sysdig events UI
+By the end of this POC you should be to: 
+- Sign and publish a container image to an OCI registry
+- Demonstrate how the signature verification is performed in the cluster
+- Block unsigned images in a specific namespace, allow but warn on other namespaces
+- Notify of blocked or non-compliant images in Sysdig events UI
+
+## overview
+
+#### What is image signing?
+Image signing is the process of adding a digital signature to an image in an OCI registry. This signature will allow the user of a container image to verify the source and trust the container image.
+
+#### How does the image signing process work?
+You can achieve container image verification in three simple steps:
+- Pushing the image to a registry.
+- Signing the image in the registry.
+- Verifying the signature with every pull request.
+
+#### what tools are we going to use?
+- Signature: the most common signature solutions are Cosign and Notary. A Notary service consists of Notary server, Notary signer, Notary client, MySQL database. And you also need to setup MTLS between Notary server and Notary signer. While with Cosign we simply install binary. So will use Cosign
+- Verification: In this POC I will demonstrate two different options for verification, Kyverno and Connaisseur.    
+  - The good thing about Kyverno is that it is designed for Kubernetes and is very easy to configure. But it doesn't include a simple way to alert and monitor. So you will probably need to rely on another solution, like policy-repoter for alerting and getting an overview of the policy results.  
+  - Connaisseur is easy to configure and operates in two modes: block or only detection. The only drawback I found during testing is that the detection and prevention modes are configured globally, so I can't choose to block unsigned images in one namespace and notify in another.
+- Alerting: Finally, we will forward Connaisseur alerts to Sysdig cloud over the REST API. 
 
 # Steps:
 
@@ -123,7 +143,8 @@ kubectl run unsignedimage -n enforce-namespace --image=josephyostos/dev-repo:sig
 
 This time it should be successfully deployed.
 
-3- uninstall kyverno
+3- cleanup: uninstall kyverno
+Before testing Connaisseur, make sure to uninstall Kyverno.
 
 ```bash
 helm uninstall kyverno -n kyverno
@@ -148,12 +169,6 @@ kubectl run unsignedimage --image=josephyostos/dev-repo:unsigned
 ```
 
 The signed image should be deployed successfully, while the unsigned one will be blocked. 
-
-3- Uninstall Connaisseur
-
-```bash
-helm uninstall Connaisseur -n Connaisseur
-```
 
 ## Notifying non-compliant images in Sysdig
 
@@ -200,10 +215,9 @@ helm upgrade --install connaisseur helm --atomic --create-namespace --namespace 
 
 (please note that the https://secure.sysdig.com part of the URL will change if you are not in the default US1 region)
 
-## Modules
+3- Cleanup: Uninstall Connaisseur  
 
-- [Module 0: Solution overview ](modules/solution-overview.md)
-- [Module 1: Sign and publish a container image to an OCI registryusing Cosign ](modules/Sign-images.md)
-- [Module 2: Signature verification via Kubernetes Admission controllers and Connaisseur](modules/Connaisseur.md)
-
+```bash
+helm uninstall Connaisseur -n Connaisseur  
+```
 
