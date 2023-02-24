@@ -14,7 +14,7 @@ This repo aims to set up a solution to sign container images and integrate it wi
 
 1- clone the github repo
 ```
-git clone 
+git clone https://github.com/JosephYostos/Container-image-signature-and-verification.git
 ```
 
 2- create a Kubernetes cluster.
@@ -74,36 +74,36 @@ Run the following script to install and configure Kyverno. This script will do t
 - Create a policy to audit unsigned image deployments in all namespace and block unsigned images in namespace "enforce-namespace" 
 
 ```bash
-./kyverno.sh
+./scripts/kyverno.sh
 ```
 
 2- verify images in kubernetes
 
-- Try to deploy unsigned image in default name space 
+- Try to deploy an unsigned image in `default` namespace. 
 
 ```bash
 kubectl run unsignedimage --image=josephyostos/dev-repo:unsigned
 ```
 
-you should be able to run a container using unsigned image, but if you check kyverno logs you should see an alert. run the following command to chekc the logs
+You should be able to run a container using the unsigned image, but if you check kyverno logs, you should see an alert. Run the following command to check the logs
 
 ```bash 
 kubectl -n kyverno logs $(kubectl -n kyverno get po -l app.kubernetes.io/component=kyverno -ojsonpath='{.items[0].metadata.name}') |tail -n 3
 ```
 
-you should see msg similar to this
+You will see msg similar to this
 
 ```
 E0224 00:34:09.288240       1 imageVerify.go:384] EngineVerifyImages "msg"="failed to verify image" "error"=".attestors[0].entries[0].keys: no matching signatures:\n" "kind"="Pod" "name"="unsignedimage" "namespace"="default" "policy"="verify-image"
 ```
 
-- Try to deploy unsigned image in `enforce-namespace` namespace 
+- Try to deploy an unsigned image in `enforce-namespace` namespace. 
 
 ```bash
 kubectl run unsignedimage -n enforce-namespace --image=josephyostos/dev-repo:unsigned
 ```
 
-This time kyverno will deny the request, and you will get a masseage similar to this 
+This time kyverno will deny the request, and you will get a message similar to this 
 
 ```
 Error from server: admission webhook "mutate.kyverno.svc-fail" denied the request:
@@ -115,14 +115,13 @@ verify-image:
     failed to verify image docker.io/josephyostos/dev-repo:unsigned: .attestors[0].entries[0].keys: no matching signatures:
  ```
 
-- Try to deploy signed image in `enforce-namespace` namespace 
+- Try to deploy a signed image in `enforce-namespace` namespace 
 
 ```bash
 kubectl run unsignedimage -n enforce-namespace --image=josephyostos/dev-repo:signed
 ```
 
-This should be a successfull request.
-
+This time it should be successfully deployed.
 
 3- uninstall kyverno
 
@@ -133,7 +132,7 @@ helm uninstall kyverno -n kyverno
 ## Connaisseur
 
 1- Install Connaisseur
-- This script will install Connaisseur and update the charts to allow only images from my registry and also it has to be signed using the cosign.pub
+- This script will install Connaisseur and update the charts to allow only signed images from my docker hub registry.
 
 ```bash
 ./scripts/connaisseur.sh
@@ -141,14 +140,14 @@ helm uninstall kyverno -n kyverno
 
 2- verify images in kubernetes
 
-- Try to deploy a container once from a sgined image and another from unsigned image
+- Try to deploy two containers, first from a signed image and the other from an unsigned image.
 
 ```bash
 kubectl run signedimage --image=josephyostos/dev-repo:signed
 kubectl run unsignedimage --image=josephyostos/dev-repo:unsigned
 ```
 
-The signed image should be deployied successfully while the unsigned one will be blocked. 
+The signed image should be deployed successfully, while the unsigned one will be blocked. 
 
 3- Uninstall Connaisseur
 
@@ -156,6 +155,39 @@ The signed image should be deployied successfully while the unsigned one will be
 helm uninstall Connaisseur -n Connaisseur
 ```
 
+## Notifying non-compliant images in Sysdig
+
+Connaisseur offers a notifications template system that allows integration with Sysdig.
+
+1- Create a sysdig.json file template under $connaisseur/helm/alert_payload_templates: 
+
+```
+{
+    "events": [
+        {
+            "timestamp": "2021-11-08T13:44:05+00:00",
+            "rule": "Check image signature",
+            "priority": "warning",
+            "output": "The image signature verification failed for image {{imagename}}",
+            "source": "Connaisseur AC",
+            "tags": [
+                "foo",
+                "bar"
+            ],
+            "output_fields": {
+                "field1": "value1",
+                "field2": "value2"
+            }
+        }
+    ],
+    "labels": {
+        "label1": "label1-value",
+        "label2": "label2-value"
+    }
+}
+```
+
+2- Update values.yaml with sysdig cloud URL and API token.
 
 
 ## Modules
