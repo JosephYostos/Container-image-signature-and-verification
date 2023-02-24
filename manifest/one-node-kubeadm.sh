@@ -8,7 +8,9 @@ sudo apt update -y
 sudo apt install -y \
     watch \
     ipset \
-    tcpdump
+    tcpdump \
+    docker-ce \
+    docker-ce-cli
 
 sudo apt install -y \
           kubeadm=${K8SVERSION} \
