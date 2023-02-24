@@ -8,9 +8,16 @@ This repo aims to set up a solution to sign container images and integrate it wi
 3- Block unsigned images in a specific namespace, allow but warn on other namespaces
 4- Notify of blocked or noncompliant images in Sysdig events UI
 
-## Steps:
+# Steps:
 
-1-  Create Kuberenetes cluster  
+## Prepare the environment  
+
+1- clone the github repo
+```
+git clone 
+```
+
+2- create a Kubernetes cluster.
 
 To start our POC we need a kuberenetes clysetr to work with. I have created a 1 node kubeadm cluster on ubuntu 18.04 ec2 (t2.xlarge) instance. use the following script to install kubeadm (k8 2.25) with calico CNI (3.24):
 
@@ -18,22 +25,25 @@ To start our POC we need a kuberenetes clysetr to work with. I have created a 1 
 ./manifest/one-node-kubeadm.sh
 ```
 
-2- Install cosign 
-This script will install go 1.19, then install cosign and generate a key with password `C0S!gN`. To change the password edit the COSIGN_PASSWORD in the shell script.
+## Cosign
+
+1- Install cosign 
+This script will install Cosign and generate a key with password `C0S!gN`. To change the password, edit the COSIGN_PASSWORD in the shell script.
 
 ```bash
 source ./manifest/cosign.sh
 ```
+Note: Make sure to run the script using source command to successfully add the `COSIGN_PASSWORD` variable to the env.
 
-3- Login to your container registry using your own cerdientials. 
-I this example I used docker hub so I will use `docker login` command  
+2- Login to your container registry using your own credentials. 
+In this example, I used docker hub, so I will use the `docker login` command. 
 
 ```bash
 docker login
 ```
 
-4- upload image to your registry.
-For the demo purpose, I will download two different images and will tag it, then push it to my registry. feel free to create or choose any other image.    
+3- upload the image to your registry.
+For the demo purpose, I will download two different images, tag them, and then push them to my registry. Feel free to create or choose any other image.   
 
 ```bash 
 docker pull alpine
@@ -44,23 +54,24 @@ docker push josephyostos/dev-repo:signed
 docker push josephyostos/dev-repo:unsigned
 ```
 
-5- sign the image 
+4- sign the image 
 
 ```bash
 cosign sign --key cosign.key josephyostos/dev-repo:signed
 ```
-we will get message `Pushing signature to: index.docker.io/josephyostos/dev-repo`
+When successfully signed, we should get message `Pushing signature to: index.docker.io/josephyostos/dev-repo`
 
 
 ## kyverno
 
 1- install Kyverno 
-Run the following script to install and configure Kyverno. this script will create the following:
-- install helm 
+
+Run the following script to install and configure Kyverno. This script will do the following:
+- Install helm 
 - Add Kyverno Helm repository
 - Install the Kyverno Helm chart into a new namespace called "kyverno"
-- creat secret has cosign public key into "kyverno" namespace
-- create a policy to audit unsigned image deployments in all namespace and block unsigned images in namespace "enforce-namespace" 
+- Create secret has the cosign public key into "kyverno" namespace
+- Create a policy to audit unsigned image deployments in all namespace and block unsigned images in namespace "enforce-namespace" 
 
 ```bash
 ./kyverno.sh
@@ -113,7 +124,7 @@ kubectl run unsignedimage -n enforce-namespace --image=josephyostos/dev-repo:sig
 This should be a successfull request.
 
 
-2- uninstall kyverno
+3- uninstall kyverno
 
 ```bash
 helm uninstall kyverno -n kyverno
@@ -121,13 +132,31 @@ helm uninstall kyverno -n kyverno
 
 ## Connaisseur
 
-1- install 
-- install Connaisseur
-- update values to allow only signed images using the cosign.pub
+1- Install Connaisseur
+- This script will install Connaisseur and update the charts to allow only images from my registry and also it has to be signed using the cosign.pub
 
 ```bash
 ./scripts/connaisseur.sh
 ```
+
+2- verify images in kubernetes
+
+- Try to deploy a container once from a sgined image and another from unsigned image
+
+```bash
+kubectl run signedimage --image=josephyostos/dev-repo:signed
+kubectl run unsignedimage --image=josephyostos/dev-repo:unsigned
+```
+
+The signed image should be deployied successfully while the unsigned one will be blocked. 
+
+3- Uninstall Connaisseur
+
+```bash
+helm uninstall Connaisseur -n Connaisseur
+```
+
+
 
 ## Modules
 
