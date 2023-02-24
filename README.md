@@ -51,7 +51,41 @@ cosign sign --key cosign.key josephyostos/dev-repo:signed
 ```
 we will get message `Pushing signature to: index.docker.io/josephyostos/dev-repo`
 
-6- Kyverno 
+6- 
+
+1- install Kyverno 
+Run the following script to install and configure Kyverno. this script will create the following:
+- install helm 
+- Add Kyverno Helm repository
+- Install the Kyverno Helm chart into a new namespace called "kyverno"
+- creat secret has cosign public key into "kyverno" namespace
+- create a policy to audit unsigned image deployments in all namespace and block unsigned images in namespace "enforce-namespace" 
+
+```bash
+./kyverno.sh
+```
+
+2- verify images in kubernetes
+
+- Try to deploy unsigned image in default name space 
+
+```bash
+kubectl run unsignedimage --image=josephyostos/dev-repo:unsigned
+```
+
+you should be able to run a container using unsigned image, but if you check kyverno logs you should see an alert. run the following command to chekc the logs
+
+```bash 
+kubectl -n kyverno logs $(kubectl -n kyverno get po -l app.kubernetes.io/component=kyverno -ojsonpath='{.items[0].metadata.name}') |tail -n 3
+```
+
+you should see msg similar to 
+
+```
+E0224 00:34:09.288240       1 imageVerify.go:384] EngineVerifyImages "msg"="failed to verify image" "error"=".attestors[0].entries[0].keys: no matching signatures:\n" "kind"="Pod" "name"="unsignedimage" "namespace"="default" "policy"="verify-image"
+```
+
+
 
 # Add the Helm repository
 helm repo add kyverno https://kyverno.github.io/kyverno/
