@@ -51,7 +51,7 @@ To start our POC we need a kuberenetes clysetr to work with. I have created a 1 
 This script will install Cosign and generate a key with password `C0S!gN`. To change the password, edit the COSIGN_PASSWORD in the shell script.
 
 ```bash
-source ./manifest/cosign.sh
+source ./scripts/cosign.sh
 ```
 Note: Make sure to run the script using source command to successfully add the `COSIGN_PASSWORD` variable to the env.
 
