@@ -42,7 +42,7 @@ git clone https://github.com/JosephYostos/Container-image-signature-and-verifica
 To start our POC we need a kuberenetes clysetr to work with. I have created a 1 node kubeadm cluster on ubuntu 18.04 ec2 (t2.xlarge) instance. use the following script to install kubeadm (k8 2.25) with calico CNI (3.24):
 
 ```bash
-./manifest/one-node-kubeadm.sh
+./scripts/one-node-kubeadm.sh
 ```
 
 ## Cosign
