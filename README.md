@@ -187,8 +187,18 @@ Connaisseur offers a notifications template system that allows integration with 
 }
 ```
 
-2- Update values.yaml with sysdig cloud URL and API token.
+2- Update charts with Sysdig cloud URL and API token.
 
+You either update the values.yaml or use the following command after adding the correct URL and token.
+
+```bash
+helm upgrade --install connaisseur helm --atomic --create-namespace --namespace connaisseur \
+ --set "validators[0].name=default,validators[0].type=cosign,validators[0].trust_roots[0].name=default,validators[0].trust_roots[0].key=$(cat ../cosign.pub),policy[0].pattern="docker.io/josephyostos/dev-repo*",policy[0].validator=default" \
+ --set alerting.admit_request.templates[0].template=sysdig,alerting.admit_request.templates[0].receiver_url="https://app.us4.sysdig.com/api/v1/eventsDispatch/ingest",alerting.admit_request.templates[0].headers="Authorization: Bearer fdf2b81c-e1b2-429a-826c-2bc73422bb84" \
+ --set alerting.reject_request.templates[0].template=sysdig,alerting.reject_request.templates[0].receiver_url="https://app.us4.sysdig.com/api/v1/eventsDispatch/ingest",alerting.reject_request.templates[0].headers="Authorization: Bearer fdf2b81c-e1b2-429a-826c-2bc73422bb84" 
+```
+
+(please note that the https://secure.sysdig.com part of the URL will change if you are not in the default US1 region)
 
 ## Modules
 
