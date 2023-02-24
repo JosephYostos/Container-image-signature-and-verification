@@ -10,7 +10,7 @@ sudo apt install -y \
     ipset \
     tcpdump 
 
-sudo apt-get install docker-ce docker-ce-cli
+sudo apt-get install -y docker-ce docker-ce-cli
 
 sudo apt install -y \
           kubeadm=${K8SVERSION} \
