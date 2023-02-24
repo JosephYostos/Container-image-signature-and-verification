@@ -122,6 +122,12 @@ helm uninstall kyverno -n kyverno
 ## Connaisseur
 
 1- install 
+- install Connaisseur
+- update values to allow only signed images using the cosign.pub
+
+```bash
+./scripts/connaisseur.sh
+```
 
 ## Modules
 
