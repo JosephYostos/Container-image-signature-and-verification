@@ -51,7 +51,8 @@ cosign sign --key cosign.key josephyostos/dev-repo:signed
 ```
 we will get message `Pushing signature to: index.docker.io/josephyostos/dev-repo`
 
-6- 
+
+## kyverno
 
 1- install Kyverno 
 Run the following script to install and configure Kyverno. this script will create the following:
@@ -79,22 +80,48 @@ you should be able to run a container using unsigned image, but if you check kyv
 kubectl -n kyverno logs $(kubectl -n kyverno get po -l app.kubernetes.io/component=kyverno -ojsonpath='{.items[0].metadata.name}') |tail -n 3
 ```
 
-you should see msg similar to 
+you should see msg similar to this
 
 ```
 E0224 00:34:09.288240       1 imageVerify.go:384] EngineVerifyImages "msg"="failed to verify image" "error"=".attestors[0].entries[0].keys: no matching signatures:\n" "kind"="Pod" "name"="unsignedimage" "namespace"="default" "policy"="verify-image"
 ```
 
+- Try to deploy unsigned image in `enforce-namespace` namespace 
+
+```bash
+kubectl run unsignedimage -n enforce-namespace --image=josephyostos/dev-repo:unsigned
+```
+
+This time kyverno will deny the request, and you will get a masseage similar to this 
+
+```
+Error from server: admission webhook "mutate.kyverno.svc-fail" denied the request:
+
+policy Pod/enforce-namespace/unsignedimage for resource violation:
+
+verify-image:
+  verify-image: |
+    failed to verify image docker.io/josephyostos/dev-repo:unsigned: .attestors[0].entries[0].keys: no matching signatures:
+ ```
+
+- Try to deploy signed image in `enforce-namespace` namespace 
+
+```bash
+kubectl run unsignedimage -n enforce-namespace --image=josephyostos/dev-repo:signed
+```
+
+This should be a successfull request.
 
 
-# Add the Helm repository
-helm repo add kyverno https://kyverno.github.io/kyverno/
-# Scan your Helm repositories to fetch the latest available charts.
-helm repo update
-# Install the Kyverno Helm chart into a new namespace called "kyverno"
-helm install kyverno kyverno/kyverno -n kyverno --create-namespace
+2- uninstall kyverno
 
+```bash
+helm uninstall kyverno -n kyverno
+```
 
+## Connaisseur
+
+1- install 
 
 ## Modules
 
