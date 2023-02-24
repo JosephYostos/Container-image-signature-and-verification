@@ -1,0 +1,28 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-image
+spec:
+  validationFailureAction: Audit
+  validationFailureActionOverrides:
+    - action: Enforce     # Action to apply
+      namespaces:       # List of affected namespaces
+        - enforce-namespace
+  background: true
+  rules:
+    - name: verify-image
+      match:
+        any:
+        - resources:
+            kinds:
+              - Pod
+              - Deployment
+      verifyImages:
+      - imageReferences:
+              - "docker.io/josephyostos/dev-repo:*"
+        attestors:
+        - entries:
+          - keys:
+              secret:
+                 name: cosign
+                 namespace: kyverno
